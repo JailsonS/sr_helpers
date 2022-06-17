@@ -1,6 +1,6 @@
 import ee
 
-CLD_PRB_THRESH = 50
+CLD_PRB_THRESH = 60
 NIR_DRK_THRESH = 0.15
 CLD_PRJ_DIST = 1
 BUFFER = 50
@@ -13,18 +13,15 @@ def removeShadowAndClouds2(srCollection, propCollection):
 
 def getCombinedCollection(srCollection, propCollection):
 
-    filter = ee.Filter.equals(**{
-        'leftField': 'system:index',
-        'rightField': 'system:index'
-    })
+    filter = ee.Filter.equals(leftField='system:index', rightField='system:index')
 
     typeFilter = ee.Join.saveFirst(matchKey='s2cloudless')
     
-    joined = typeFilter.apply(**{
-        'primary': srCollection,
-        'secondary': propCollection, 
-        'condition': filter
-    })
+    joined = typeFilter.apply(
+        primary=srCollection,
+        secondary=propCollection, 
+        condition=filter
+    )
 
 
     return ee.ImageCollection(joined)
