@@ -13,8 +13,9 @@ def removeShadowAndClouds2(srCollection, propCollection):
 
 def getCombinedCollection(srCollection, propCollection):
 
+    print(1)
     filter = ee.Filter.equals(leftField='system:index', rightField='system:index')
-
+    print(2)
     typeFilter = ee.Join.saveFirst(matchKey='s2cloudless')
     
     joined = typeFilter.apply(
