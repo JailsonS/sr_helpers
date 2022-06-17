@@ -13,11 +13,18 @@ def removeShadowAndClouds2(srCollection, propCollection):
 
 def getCombinedCollection(srCollection, propCollection):
 
-    filter = ee.Filter.equals(leftField = 'system:time_start',rightField = 'system:time_start')
+    filter = ee.Filter.equals(**{
+        'leftField': 'system:index',
+        'rightField': 'system:index'
+    })
 
     typeFilter = ee.Join.saveFirst(matchKey='s2cloudless')
     
-    joined = typeFilter.apply(primary=srCollection, secondary=propCollection, condition=filter)
+    joined = typeFilter.apply(**{
+        'primary': srCollection,
+        'secondary': propCollection, 
+        'condition': filter
+    })
 
 
     return ee.ImageCollection(joined)
