@@ -16,7 +16,7 @@ def getCombinedCollection(srCollection, propCollection):
         ee.Join.saveFirst('s2cloudless').apply(**{
           'primary': srCollection,
           'secondary': propCollection,
-          'condition': ee.Filter.equals({
+          'condition': ee.Filter.equals(**{
               'leftField': 'system:index',
               'rightField': 'system:index'
           })
