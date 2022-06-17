@@ -12,16 +12,18 @@ def removeShadowAndClouds2(srCollection, propCollection):
     return col
 
 def getCombinedCollection(srCollection, propCollection):
-    return ee.ImageCollection(
-        ee.Join.saveFirst('s2cloudless').apply(
-          primary=srCollection,
-          secondary=propCollection,
-          condition=ee.Filter.equals(
-              leftField='system:index',
-              rightField='system:index'
-          )
-        )
+
+    filter = ee.Filter.equals(
+        leftField='system:index',
+        rightField='system:index'
     )
+
+    typeFilter = ee.Join.saveFirst(matchKey='s2cloudless')
+    
+    joined = typeFilter.apply(srCollection, propCollection, filter)
+
+
+    return ee.ImageCollection(joined)
 
 
 def addCloudBands(img):
@@ -48,8 +50,7 @@ def addShadowBands(img):
 
     # Project shadows from clouds for the distance specified by the CLD_PRJ_DIST input.
     cld_proj = (img.select('clouds').directionalDistanceTransform(shadow_azimuth, CLD_PRJ_DIST*10)
-        .reproject(
-            crs=img.select(0).projection(), scale=100)
+        .reproject(crs=img.select(0).projection(), scale=100)
         .select('distance')
         .mask()
         .rename('cloud_transform'))
