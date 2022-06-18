@@ -1,12 +1,12 @@
 import ee
 
+CLD_PRB_THRESH = 60
+NIR_DRK_THRESH = 0.15
+CLD_PRJ_DIST = 1
+BUFFER = 50
+
 
 def removeShadowAndClouds2(srCollection, propCollection):
-    
-    CLD_PRB_THRESH = 60
-    NIR_DRK_THRESH = 0.15
-    CLD_PRJ_DIST = 1
-    BUFFER = 50
 
     col = getCombinedCollection(srCollection, propCollection)
 
