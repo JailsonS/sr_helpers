@@ -5,9 +5,8 @@ NIR_DRK_THRESH = 0.15
 CLD_PRJ_DIST = 1
 BUFFER = 50
 
-
 def removeShadowAndClouds2(srCollection, propCollection):
-
+    
     col = getCombinedCollection(srCollection, propCollection)
 
     col = col.map(lambda img: addCldShdwMask(img))
@@ -86,3 +85,44 @@ def addCldShdwMask(img):
 
     # Add the final cloud-shadow mask to the image.
     return img_cloud_shadow.addBands(is_cld_shdw)
+
+
+def setProperties(image):
+    """Normaliza algumas propriedades entre imagens Landsat e Sentinel-2"""
+    cloudCover = ee.Algorithms.If(image.get('SPACECRAFT_NAME'),
+                                  image.get('CLOUDY_PIXEL_PERCENTAGE'),
+                                  image.get('CLOUD_COVER'))
+
+    date = ee.Algorithms.If(image.get('DATE_ACQUIRED'),
+                            image.get('DATE_ACQUIRED'),
+                            ee.Algorithms.If(image.get('SENSING_TIME'),
+                                             image.get('SENSING_TIME'),
+                                             image.get('GENERATION_TIME')))
+
+    satellite = ee.Algorithms.If(image.get('SPACECRAFT_ID'),
+                                 image.get('SPACECRAFT_ID'),
+                                 ee.Algorithms.If(image.get('SATELLITE'),
+                                                  image.get('SATELLITE'),
+                                                  image.get('SPACECRAFT_NAME')))
+
+    azimuth = ee.Algorithms.If(image.get('SUN_AZIMUTH'),
+                               image.get('SUN_AZIMUTH'),
+                               ee.Algorithms.If(image.get('SOLAR_AZIMUTH_ANGLE'),
+                                                image.get(
+                                                    'SOLAR_AZIMUTH_ANGLE'),
+                                                image.get('MEAN_SOLAR_AZIMUTH_ANGLE')))
+
+    elevation = ee.Algorithms.If(image.get('SUN_ELEVATION'),
+                                 image.get('SUN_ELEVATION'),
+                                 ee.Algorithms.If(image.get('SOLAR_ZENITH_ANGLE'),
+                                                  ee.Number(90).subtract(
+                                                      image.get('SOLAR_ZENITH_ANGLE')),
+                                                  ee.Number(90).subtract(image.get('MEAN_SOLAR_ZENITH_ANGLE'))))
+
+    return image \
+        .set('cloud_cover', cloudCover) \
+        .set('satellite_name', satellite) \
+        .set('sun_azimuth_angle', azimuth) \
+        .set('sun_elevation_angle', elevation) \
+        .set('date', ee.Date(date).format('Y-MM-dd'))
+    
